@@ -1,0 +1,16 @@
+[workspace]
+members = [
+    "nexus-parser",
+    "nexus-index",
+    "nexus-crypto",
+    "nexus-diff",
+    "nexus-timetravel",
+    "nexus-git"
+]
+resolver = "2"
+
+[profile.release]
+lto = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"

@@ -1,0 +1,11 @@
+[package]
+name = "nexus-crypto"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aes-gcm = "0.10"
+ed25519-dalek = "2.1"
+rs_merkle = "1.4"
+thiserror = "1.0"
+anyhow = "1.0"

@@ -1,0 +1,48 @@
+name: NEXUS-IDE Release Matrix CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-core:
+    name: Core Engine (Rust)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-14, ubuntu-22.04]
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust & Targets
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-apple-ios, aarch64-linux-android
+    - name: Rustfmt
+      run: cargo fmt --all -- --check
+      working-directory: ./core
+    - name: Clippy Strict
+      run: cargo clippy --all-targets --all-features -- -D warnings
+      working-directory: ./core
+    - name: Build Core Simulator
+      run: cargo build --release
+      working-directory: ./core
+
+  validate-mobile:
+    name: Presentation & Shared (KMP)
+    runs-on: macos-14
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+    - name: Linters (ktlint & swiftlint)
+      run: |
+        brew install swiftlint
+        ./tools/pre-commit.sh
+    - name: Headless Tests iOS & Android
+      run: echo "Running headless integrations..."

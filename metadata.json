@@ -1,0 +1,6 @@
+{
+  "name": "NexusCode Mobile IDE",
+  "description": "Interactive mobile mockup for the NexusCode AI IDE.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
