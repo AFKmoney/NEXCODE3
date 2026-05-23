@@ -385,7 +385,16 @@ export default function NexusCodeApp() {
       let count = 0;
       for (const item of treeData.tree) {
         if (item.type === "blob" && !item.path.includes("node_modules") && !item.path.includes(".png") && count < 50) {
-           newFiles[item.path] = "// Fetching contents from GitHub...";
+           try {
+             const contentRes = await fetch(`https://raw.githubusercontent.com/${repoInput}/${defaultBranch}/${item.path}`);
+             if (contentRes.ok) {
+               newFiles[item.path] = await contentRes.text();
+             } else {
+               newFiles[item.path] = "// Failed to fetch from GitHub.";
+             }
+           } catch (e) {
+             newFiles[item.path] = "// Error fetching content.";
+           }
            count++;
         }
       }
@@ -773,23 +782,29 @@ export default function NexusCodeApp() {
     setIsChatLoading(true);
 
     try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: [...messages, { role: 'user', content: textToSend }], 
-          codeContext: activeCode, 
-          settings,
-          provider: activeProvider,
-          apiKeys,
-          models
-        })
-      });
-      const data = await res.json();
-      hapticVibrate([30, 50, 30]);
-      setMessages(prev => [...prev, { role: 'ai', content: data.reply || data.error }]);
-    } catch {
-      setMessages(prev => [...prev, { role: 'ai', content: "Network error. (Cloud Verification required)" }]);
+      if (activeProvider === 'gemini') {
+        const apiKey = apiKeys.gemini;
+        if (!apiKey) throw new Error("Gemini API Key missing in Settings.");
+        
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey });
+        
+        const systemPrompt = `Tu es Nexus IA, un assistant de pair-programming. Code Context:\n\n${activeCode}\n\nRponds de maniere concise.`;
+        const formattedMessages = messages.map((m: any) => `${m.role === 'user' ? 'User' : 'Nexus'}: ${m.content}`).join('\n\n');
+        const promptText = systemPrompt + "\n\n" + formattedMessages + "\n\nUser: " + textToSend + "\n\nNexus:";
+        
+        const response = await ai.models.generateContent({
+          model: models.gemini || 'gemini-2.5-flash',
+          contents: promptText,
+        });
+        
+        hapticVibrate([30, 50, 30]);
+        setMessages(prev => [...prev, { role: 'ai', content: response.text || "No response." }]);
+      } else {
+        throw new Error(`Direct client-side call for ${activeProvider} is not yet implemented. Use Gemini.`);
+      }
+    } catch (err: any) {
+      setMessages(prev => [...prev, { role: 'ai', content: `Error: ${err.message}` }]);
     } finally {
       setIsChatLoading(false);
     }
@@ -1945,7 +1960,7 @@ export default function NexusCodeApp() {
                      </AnimatePresence>
                    </div>
                  </div>
-                 <button onClick={() => setIsAiPanelOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                 <button onPointerDown={(e) => e.stopPropagation()} onClick={() => setIsAiPanelOpen(false)} className="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
                    <X className="w-5 h-5" />
                  </button>
                </div>
