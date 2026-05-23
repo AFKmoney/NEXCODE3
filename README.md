@@ -2,13 +2,22 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# AI Studio Applet
 
-This contains everything you need to run your app locally.
+This is a neural operating system applet built with Next.js and Capacitor.
 
-View your app in AI Studio: https://ai.studio/apps/17015164-7449-4375-b1ec-1d047393971b
+## Mobile Version (Android)
 
-## Run Locally
+An APK has been generated and is available in the root directory: [AI_Studio_v0.1.0_Debug.apk](./AI_Studio_v0.1.0_Debug.apk)
+
+### How to build the APK yourself:
+
+1. Install dependencies: `npm install`
+2. Build the project: `npm run build`
+3. Sync Capacitor: `npx cap sync`
+4. Build the APK: `cd android && ./gradlew assembleDebug`
+
+## Run Locally (Web)
 
 **Prerequisites:**  Node.js
 
