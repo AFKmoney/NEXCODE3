@@ -387,6 +387,7 @@ export default function NexusCodeApp() {
 
   // --- UI Elements ---
   const activeCode = activeFile ? files[activeFile] || "" : "";
+  const Header = MainHeader as any;
   
   const cmds = [
     { title: "Connect GitHub", run: () => { setIsCommandPaletteOpen(false); setActiveTab("files"); } },
@@ -419,7 +420,7 @@ export default function NexusCodeApp() {
 
       <motion.div layout transition={{ type: "spring", damping: 25, stiffness: 200 }} className="relative bg-[#050505]/95 backdrop-blur-3xl shadow-[0_40px_80px_rgba(0,0,0,1)] flex flex-col mx-auto ring-1 ring-white/10 z-10 transition-all duration-300 overflow-hidden w-full h-[100dvh] sm:h-[95vh] sm:w-[95vw] sm:max-w-[1400px] sm:rounded-[32px]">
         
-        <MainHeader 
+        <Header 
            activeTab={activeTab} activeFile={activeFile} currentRepo={currentRepo} setActiveTab={setActiveTab as any}
            setIsCommandPaletteOpen={setIsCommandPaletteOpen} handleSaveVFS={handleSaveVFS} handleRunCode={handleRunCode}
            isRunning={isRunning} isEditMode={isEditMode} setIsEditMode={setIsEditMode} handleRefactorAnalysis={handleRefactorAnalysis}

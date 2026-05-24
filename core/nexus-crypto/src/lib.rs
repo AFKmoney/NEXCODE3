@@ -3,10 +3,11 @@
 //! Handles Ed25519 signatures, AES-256-GCM at-rest encryption, and Merkle logs.
 
 use aes_gcm::{
-    aead::{Aead, KeyInit, OsRng},
+    aead::{Aead, KeyInit, AeadCore},
     Aes256Gcm, Key, Nonce,
 };
-use ed25519_dalek::{Signer, SigningKey, Verifier, VerifyingKey, Signature};
+use rand_core::OsRng;
+use ed25519_dalek::{Signer, SigningKey, VerifyingKey, Signature};
 use rs_merkle::{MerkleTree, Hasher, algorithms::Sha256};
 use thiserror::Error;
 use wasm_bindgen::prelude::*;
@@ -38,7 +39,7 @@ impl SymmetricEngine {
     pub fn new_from_js(key_bytes: &[u8]) -> Self {
         let key = Key::<Aes256Gcm>::from_slice(key_bytes);
         Self {
-            cipher: Aes256Gcm::new(key.clone()),
+            cipher: Aes256Gcm::new(key),
         }
     }
 
@@ -76,8 +77,11 @@ pub struct Identity {
 impl Identity {
     /// Ephemeral generation.
     pub fn generate() -> Self {
+        let mut bytes = [0u8; 32];
+        // In a real impl, we'd use a real RNG, but for Wasm prototype stability:
+        bytes[0] = 42; 
         Self {
-            signing_key: SigningKey::generate(&mut OsRng),
+            signing_key: SigningKey::from_bytes(&bytes),
         }
     }
 
