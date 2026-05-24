@@ -18,8 +18,9 @@ import { nexus } from "@/lib/engine";
 import { causal } from "@/lib/causal";
 import { vfs } from "@/lib/vfs";
 import { collab } from "@/lib/collab";
+import { rag } from "@/lib/rag";
 
-// ... Import Refactored Components ...
+// Import Refactored Components (Dynamic for client-side)
 const EditorView = dynamic(() => import("@/components/Editor/EditorView").then(mod => mod.EditorView), { ssr: false });
 const TerminalView = dynamic(() => import("@/components/Terminal/TerminalView").then(mod => mod.TerminalView), { ssr: false });
 const FileExplorerView = dynamic(() => import("@/components/FileExplorer/FileExplorerView").then(mod => mod.FileExplorerView), { ssr: false });
@@ -118,11 +119,14 @@ export default function NexusCodeApp() {
     const initEngines = async () => {
       await nexus.init();
       await vfs.init();
+      collab.init();
       
       const savedFiles = await vfs.getAllFiles();
       if (Object.keys(savedFiles).length > 0) {
         setFiles(savedFiles);
         setOriginalFiles(savedFiles);
+        // Pilier 3: Index for project-wide AI awareness
+        rag.indexWorkspace(savedFiles);
       }
     };
     initEngines();
@@ -130,12 +134,26 @@ export default function NexusCodeApp() {
 
   // --- Worker Setup ---
   const workerRef = useRef<Worker | null>(null);
+  const agentWorkerRef = useRef<Worker | null>(null);
+
   useEffect(() => {
     workerRef.current = new Worker(new URL('@/lib/workers/analyzer.worker.ts', import.meta.url));
     workerRef.current.postMessage({ type: 'INIT' });
+
+    agentWorkerRef.current = new Worker(new URL('@/lib/workers/agent.worker.ts', import.meta.url));
+    agentWorkerRef.current.onmessage = (e) => {
+       const { type, data } = e.data;
+       if (type === 'AGENT_STATUS' || type === 'AGENT_COMPLETE') {
+          const msg = typeof data === 'string' ? data : data.summary;
+          setTerminals(prev => prev.map(t => t.id === activeTerminalId ? { ...t, history: [...t.history, `[AI-AGENT] ${msg}`] } : t));
+       }
+    };
     
-    return () => workerRef.current?.terminate();
-  }, []);
+    return () => {
+       workerRef.current?.terminate();
+       agentWorkerRef.current?.terminate();
+    };
+  }, [activeTerminalId]);
 
   useEffect(() => {
     if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -173,6 +191,9 @@ export default function NexusCodeApp() {
 
     setTerminals(prev => prev.map(t => t.id === activeTerminalId ? { ...t, history: [...t.history, `[SYSTEM] Saved ${activeFile} to VFS (OPFS).`, impactMsg] } : t));
     hapticVibrate([20, 50, 20]);
+    
+    // Pilier 3: Re-index for RAG
+    rag.indexWorkspace(files);
   };
 
   const handleRunCode = async () => {
@@ -302,10 +323,13 @@ export default function NexusCodeApp() {
         const apiKey = apiKeys.gemini;
         if (!apiKey) throw new Error("Gemini API Key missing in Settings.");
         
+        // Pilier 3: RAG Context Search
+        const relevantContext = await rag.search(textToSend);
+        
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
         
-        const systemPrompt = `Tu es Nexus IA, un assistant de pair-programming. Code Context:\n\n${activeCode}\n\nRponds de maniere concise.`;
+        const systemPrompt = `Tu es Nexus IA. Tu as accès à l'intégralité du projet.\n\nCONTEXTE PROJET (RAG):\n${relevantContext}\n\nCODE ACTUEL:\n${activeCode}\n\nRéponds de manière technique et précise.`;
         const formattedMessages = messages.map((m: any) => `${m.role === 'user' ? 'User' : 'Nexus'}: ${m.content}`).join('\n\n');
         const promptText = systemPrompt + "\n\n" + formattedMessages + "\n\nUser: " + textToSend + "\n\nNexus:";
         
@@ -331,6 +355,15 @@ export default function NexusCodeApp() {
     }, 1500);
   };
 
+  const startAgentTask = (taskName: string) => {
+    if (!agentWorkerRef.current) return;
+    agentWorkerRef.current.postMessage({
+      type: 'START_AGENT_TASK',
+      payload: { taskName, projectContext: files }
+    });
+    setActiveTab("terminal");
+  };
+
   // --- UI Elements ---
   const activeCode = activeFile ? files[activeFile] || "" : "";
   
@@ -346,6 +379,8 @@ export default function NexusCodeApp() {
     { title: "Plugin Marketplace", run: () => { setIsCommandPaletteOpen(false); setActiveTab("plugins"); } },
     { title: "Task Management", run: () => { setIsCommandPaletteOpen(false); setActiveTab("tasks"); } },
     { title: "DevOps Dashboard", run: () => { setIsCommandPaletteOpen(false); setActiveTab("devops"); } },
+    { title: "Agent: Security Scan", run: () => { setIsCommandPaletteOpen(false); startAgentTask("Security Vulnerability Scan"); } },
+    { title: "Agent: Generate Docs", run: () => { setIsCommandPaletteOpen(false); startAgentTask("Auto-Documentation Module"); } },
   ];
   const filteredCmds = cmds.filter(c => c.title.toLowerCase().includes(cmdSearchQuery.toLowerCase()));
 
