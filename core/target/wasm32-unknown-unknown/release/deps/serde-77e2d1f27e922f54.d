@@ -1,0 +1,14 @@
+C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\deps\serde-77e2d1f27e922f54.d: C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\build\serde-242d627db3661f55\out/private.rs
+
+C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\deps\libserde-77e2d1f27e922f54.rlib: C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\build\serde-242d627db3661f55\out/private.rs
+
+C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\deps\libserde-77e2d1f27e922f54.rmeta: C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\build\serde-242d627db3661f55\out/private.rs
+
+C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\lib.rs:
+C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\integer128.rs:
+C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\mod.rs:
+C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\de.rs:
+C:\Users\PHIL\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serde-1.0.228\src\private\ser.rs:
+C:\Users\PHIL\Desktop\fnn\NEXCODE3\core\target\wasm32-unknown-unknown\release\build\serde-242d627db3661f55\out/private.rs:
+
+# env-dep:OUT_DIR=C:\\Users\\PHIL\\Desktop\\fnn\\NEXCODE3\\core\\target\\wasm32-unknown-unknown\\release\\build\\serde-242d627db3661f55\\out
