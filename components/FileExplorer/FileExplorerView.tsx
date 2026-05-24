@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "motion/react";
-import { FolderTree, FolderPlus, Github, Folder, FileCode2, Trash2, FilePlus, Lock } from "lucide-react";
+import { FolderTree, FolderPlus, Github, Folder, FileCode2, Trash2, FilePlus, Lock, Search, ChevronRight } from "lucide-react";
 
 type FileExplorerViewProps = {
   githubConnected: boolean;
@@ -35,116 +35,133 @@ export const FileExplorerView = ({
 }: FileExplorerViewProps) => {
   return (
     <motion.div key="files" variants={pageVariants} initial="initial" animate="animate" exit="exit" 
-      onDragOver={e => e.preventDefault()}
-      onDrop={async e => {
-        e.preventDefault();
-        if (e.dataTransfer.files.length > 0) {
-          setGithubConnected(true);
-          setCurrentRepo(currentRepo || "Local Project");
-          const newFiles = { ...files };
-          for (const file of Array.from(e.dataTransfer.files)) {
-            const text = await file.text();
-            newFiles[file.name] = text;
-          }
-          setFiles(newFiles);
-        }
-      }}
-      className="absolute inset-0 overflow-y-auto bg-transparent p-5 sm:p-6 flex flex-col w-full h-full pb-28">
+      className="absolute inset-0 overflow-y-auto scrollbar-hide flex flex-col w-full h-full pb-32">
+      
       {!githubConnected ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 pb-10 mt-6 relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none -z-10" />
-
-          <div className="w-[104px] h-[104px] bg-gradient-to-br from-[#1a1a1a] to-black border border-white/10 rounded-[35px] flex items-center justify-center shadow-[0_20px_40px_rgba(0,0,0,0.5)] relative overflow-hidden ring-1 ring-white/5">
-            <div className="absolute inset-0 bg-indigo-500/20 blur-2xl"></div>
-            <FolderTree className="w-12 h-12 text-white relative z-10" />
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 gap-12 relative overflow-hidden nexus-gradient-bg">
+          {/* Animated Background Orbs */}
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />
+             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse" />
           </div>
-          <div className="space-y-3 max-w-[280px]">
-            <h2 className="text-[26px] font-display font-bold tracking-tight text-white mb-2">Your Workspace</h2>
-            <p className="text-[14px] text-gray-400 leading-relaxed font-medium">
-              Mount a virtual file system to compile and preview multi-language projects locally.
+
+          <div className="relative group">
+            <div className="absolute inset-0 bg-indigo-500/20 rounded-[3rem] blur-3xl group-hover:bg-indigo-500/40 transition-all duration-700" />
+            <div className="w-32 h-32 glass-morphism rounded-[3rem] flex items-center justify-center relative z-10 border-white/20 shadow-2xl">
+              <FolderTree className="w-14 h-14 text-indigo-400 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
+            </div>
+          </div>
+
+          <div className="space-y-4 max-w-md relative z-10">
+            <h2 className="text-4xl font-display font-bold tracking-tight text-white leading-tight">Neural <span className="text-indigo-500">Workspace</span></h2>
+            <p className="text-gray-400 font-medium text-sm leading-relaxed">
+              Orchestrate your codebase through a secure virtual filesystem. Link your repositories to enable deep causal analysis.
             </p>
           </div>
           
-          <div className="w-[90%] space-y-4 pt-6">
-            <div className="flex w-full gap-3 flex-col">
-              <button onClick={() => { setGithubConnected(true); setCurrentRepo("Local Project"); setFiles({}); setOriginalFiles({}); }} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold text-[15px] tracking-wide transition-all shadow-[0_10px_30px_rgba(79,70,229,0.3)] flex items-center justify-center gap-2">
-                <FolderPlus className="w-5 h-5" /> New Project
-              </button>
-              <button onClick={() => { setGithubConnected(true); setCurrentRepo("Imported GitHub"); setFiles({}); setOriginalFiles({}); }} className="w-full py-4 bg-[#0a0a0a] hover:bg-[#151515] text-white rounded-full font-bold text-[15px] tracking-wide border border-white/10 transition-all shadow-md flex items-center justify-center gap-2">
-                <Github className="w-5 h-5" /> Import from GitHub
-              </button>
-            </div>
+          <div className="w-full max-w-xs space-y-4 relative z-10">
+            <button onClick={() => { setGithubConnected(true); setCurrentRepo("Local Project"); setFiles({}); setOriginalFiles({}); }} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-sm tracking-widest transition-all shadow-[0_15px_30px_rgba(79,70,229,0.3)] flex items-center justify-center gap-3 active:scale-95 border border-indigo-400/20">
+              <FolderPlus className="w-5 h-5" /> NEW ARCHITECTURE
+            </button>
+            <button onClick={() => { setGithubConnected(true); setCurrentRepo("Imported GitHub"); setFiles({}); setOriginalFiles({}); }} className="w-full py-4 glass-morphism hover:bg-white/5 text-white rounded-2xl font-bold text-sm tracking-widest transition-all flex items-center justify-center gap-3 active:scale-95 border-white/10">
+              <Github className="w-5 h-5 text-gray-400" /> IMPORT MODULE
+            </button>
           </div>
-          <div className="text-[10px] text-gray-500 font-bold tracking-widest flex items-center gap-2 uppercase mt-8 bg-white/5 px-5 py-2.5 rounded-full border border-white/5 shadow-inner backdrop-blur-md">
-             <Lock className="w-3.5 h-3.5" /> End-to-End Encrypted
+
+          <div className="flex items-center gap-3 px-6 py-2.5 glass-morphism rounded-full border-white/5 shadow-inner">
+             <Lock className="w-3.5 h-3.5 text-emerald-500" />
+             <span className="text-[10px] text-gray-500 font-bold tracking-[0.2em] uppercase">AES-256-GCM Encrypted</span>
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex justify-between items-center px-1 mb-4 border-b border-white/5 pb-4">
-            <div className="text-[13px] font-bold text-gray-200 flex items-center gap-2.5">
-              <FolderTree className="w-4 h-4 text-indigo-400" /> {currentRepo || "Local System"}
+        <div className="flex flex-col h-full bg-[#050505]">
+          {/* Header */}
+          <div className="p-6 border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-20">
+            <div className="flex justify-between items-center mb-6">
+               <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                    <FolderTree className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <h3 className="text-[13px] font-bold text-gray-200 tracking-wider uppercase">{currentRepo || "Local System"}</h3>
+               </div>
+               <div className="flex items-center gap-2">
+                  <button onClick={() => { setGithubConnected(false); setFiles({}); setOriginalFiles({}); setCurrentRepo(""); setActiveFile(""); }} className="p-2 glass-morphism rounded-lg text-gray-500 hover:text-red-400 transition-colors" title="Disconnect">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+               </div>
             </div>
-            <div className="flex items-center gap-1.5">
-              <button onClick={() => { setGithubConnected(false); setFiles({}); setOriginalFiles({}); setCurrentRepo(""); setActiveFile(""); }} className="text-gray-300 hover:text-white p-2 rounded-full transition-colors bg-white/5 hover:bg-white/10 border border-white/5" title="New Project">
-                <Folder className="w-4 h-4" />
-              </button>
-              <button onClick={() => { 
-                const name = prompt("New folder name:");
-                if (name) { 
-                  setFiles(p => ({...p, [name + "/.keep"]: ""})); 
-                  setOriginalFiles(p => ({...p, [name + "/.keep"]: ""})); 
-                }
-              }} className="text-gray-300 hover:text-white p-2 rounded-full transition-colors bg-white/5 hover:bg-white/10 border border-white/5" title="New Folder">
-                <FolderPlus className="w-4 h-4" />
-              </button>
-              <button onClick={() => {
-                const name = prompt("New file name (e.g. main.rs, script.py, app.tsx):");
-                if (name) { 
-                  let content = "";
-                  if (name.endsWith(".rs")) content = "fn main() {\n  println!(\"Hello from Rust\");\n}";
-                  else if (name.endsWith(".py")) content = "print('Hello from Python')";
-                  else if (name.endsWith(".js") || name.endsWith(".ts") || name.endsWith(".tsx")) content = "console.log('Hello from JS/TS');";
-                  else if (name.endsWith(".go")) content = "package main\n\nimport \"fmt\"\n\nfunc main() {\n  fmt.Println(\"Hello from Go\")\n}";
-                  else if (name.endsWith(".cpp")) content = "#include <iostream>\n\nint main() {\n  std::cout << \"Hello C++\\n\";\n  return 0;\n}";
-                  else if (name.endsWith(".html")) content = "<!DOCTYPE html>\n<html>\n<body>\n  <h1>New View</h1>\n</body>\n</html>";
-                  else content = "// New file";
-                  setFiles(p => ({...p, [name]: content})); 
-                  setOriginalFiles(p => ({...p, [name]: content})); 
-                  setActiveFile(name); 
-                  setActiveTab("editor"); 
-                }
-              }} className="text-gray-300 hover:text-white p-2 rounded-full transition-colors bg-white/5 hover:bg-white/10 border border-white/5" title="New File">
-                <FilePlus className="w-4 h-4" />
-              </button>
+
+            <div className="relative group">
+               <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 group-focus-within:text-indigo-500 transition-colors" />
+               <input type="text" placeholder="Filter project modules..." className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.05] transition-all" />
             </div>
           </div>
-          <div className="bg-[#050505] border border-white/5 rounded-3xl overflow-hidden shadow-xl flex flex-col ring-1 ring-white/5 mx-4 sm:mx-8">
-             {Object.keys(files).map((f) => (
-               <div key={f} className="flex items-center justify-between px-5 py-4 border-b border-white/5 hover:bg-white/5 transition-colors last:border-0 group cursor-pointer" onClick={() => loadFileContent(f)}>
-                 <div className="flex items-center gap-4 flex-1">
-                   <div className="p-2 bg-white/5 rounded-xl group-hover:scale-110 transition-transform">
-                     <FileCode2 className={`w-4 h-4 ${f.includes('html') || f.includes('jsx') || f.includes('tsx') ? 'text-blue-400' : f.includes('ts') || f.includes('js') ? 'text-yellow-400' : f.includes('rs') ? 'text-orange-400' : f.includes('py') ? 'text-emerald-400' : 'text-gray-400'}`} />
-                   </div>
-                   <div className="flex flex-col">
-                     <span className="text-[14px] text-gray-200 font-semibold truncate tracking-tight">{f.split('/').pop()}</span>
-                     <span className="text-[10px] text-gray-500 font-medium">~/workspace/{f}</span>
-                   </div>
-                 </div>
-                 <button 
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     if (confirm(`Delete ${f}?`)) {
-                       setFiles(p => { const nv = {...p}; delete nv[f]; return nv; });
-                       if (activeFile === f) setActiveFile(null);
-                     }
-                   }}
-                   className="text-gray-500 hover:text-red-400 p-2 opacity-0 group-hover:opacity-100 transition-all rounded-full hover:bg-red-400/10"
-                 >
-                   <Trash2 className="w-4 h-4" />
-                 </button>
+
+          {/* Action Bar */}
+          <div className="px-6 py-4 flex gap-3 overflow-x-auto scrollbar-hide border-b border-white/5">
+             <button onClick={() => { 
+                const name = prompt("Module name:");
+                if (name) setFiles(p => ({...p, [name + "/.keep"]: ""})); 
+             }} className="px-4 py-2 glass-morphism rounded-xl text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-white flex items-center gap-2 shrink-0">
+                <FolderPlus className="w-3.5 h-3.5" /> Module
+             </button>
+             <button onClick={() => {
+                const name = prompt("File name (e.g. main.rs):");
+                if (name) {
+                   setFiles(p => ({...p, [name]: "// Nexus Module Initialized\n"}));
+                   setActiveFile(name);
+                   setActiveTab("editor");
+                }
+             }} className="px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-500/20 rounded-xl text-[10px] font-bold uppercase tracking-widest text-indigo-400 flex items-center gap-2 shrink-0 transition-all">
+                <FilePlus className="w-3.5 h-3.5" /> New File
+             </button>
+          </div>
+
+          {/* List */}
+          <div className="flex-1 p-4 space-y-2">
+            {Object.keys(files).length === 0 ? (
+               <div className="h-64 flex flex-col items-center justify-center gap-4 opacity-20">
+                  <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-500 to-transparent" />
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em]">Empty Cluster</p>
+                  <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-500 to-transparent" />
                </div>
-             ))}
+            ) : (
+              Object.keys(files).sort().map((f) => (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }} 
+                  animate={{ opacity: 1, x: 0 }}
+                  key={f} 
+                  className={`flex items-center justify-between p-4 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden ${activeFile === f ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'}`}
+                  onClick={() => loadFileContent(f)}
+                >
+                  {activeFile === f && <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500" />}
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className={`p-2.5 rounded-xl ${activeFile === f ? 'bg-indigo-500/20' : 'bg-black/40'} group-hover:scale-110 transition-transform`}>
+                      <FileCode2 className={`w-5 h-5 ${activeFile === f ? 'text-indigo-400' : 'text-gray-500'}`} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className={`text-[14px] font-bold tracking-tight ${activeFile === f ? 'text-white' : 'text-gray-300'}`}>{f.split('/').pop()}</span>
+                      <span className="text-[10px] text-gray-500 font-mono tracking-tighter opacity-60">cluster://{f}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Decommission ${f}?`)) {
+                          setFiles(p => { const nv = {...p}; delete nv[f]; return nv; });
+                          if (activeFile === f) setActiveFile(null);
+                        }
+                      }}
+                      className="p-2 rounded-lg hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <ChevronRight className="w-4 h-4 text-gray-700" />
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       )}
