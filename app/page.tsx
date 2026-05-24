@@ -16,8 +16,10 @@ import * as diff from "diff";
 import dynamic from "next/dynamic";
 import { nexus } from "@/lib/engine";
 import { causal } from "@/lib/causal";
+import { vfs } from "@/lib/vfs";
+import { collab } from "@/lib/collab";
 
-// Import Refactored Components (Dynamic for client-side)
+// ... Import Refactored Components ...
 const EditorView = dynamic(() => import("@/components/Editor/EditorView").then(mod => mod.EditorView), { ssr: false });
 const TerminalView = dynamic(() => import("@/components/Terminal/TerminalView").then(mod => mod.TerminalView), { ssr: false });
 const FileExplorerView = dynamic(() => import("@/components/FileExplorer/FileExplorerView").then(mod => mod.FileExplorerView), { ssr: false });
@@ -113,7 +115,26 @@ export default function NexusCodeApp() {
 
   // --- Effects ---
   useEffect(() => {
-    nexus.init();
+    const initEngines = async () => {
+      await nexus.init();
+      await vfs.init();
+      
+      const savedFiles = await vfs.getAllFiles();
+      if (Object.keys(savedFiles).length > 0) {
+        setFiles(savedFiles);
+        setOriginalFiles(savedFiles);
+      }
+    };
+    initEngines();
+  }, []);
+
+  // --- Worker Setup ---
+  const workerRef = useRef<Worker | null>(null);
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('@/lib/workers/analyzer.worker.ts', import.meta.url));
+    workerRef.current.postMessage({ type: 'INIT' });
+    
+    return () => workerRef.current?.terminate();
   }, []);
 
   useEffect(() => {
@@ -138,7 +159,11 @@ export default function NexusCodeApp() {
 
   const handleSaveVFS = async () => {
     if (!activeFile) return;
-    setOriginalFiles(prev => ({ ...prev, [activeFile]: files[activeFile] }));
+    const content = files[activeFile];
+    setOriginalFiles(prev => ({ ...prev, [activeFile]: content }));
+    
+    // Pilier 2: Persistence OPFS
+    await vfs.writeFile(activeFile, content);
     
     // PhD Mode: Causal Impact Analysis
     const impact = await causal.analyzeImpact(activeFile, files);
@@ -146,7 +171,7 @@ export default function NexusCodeApp() {
       ? `[CAUSAL] Change in ${activeFile} impacts ${impact.length - 1} other files.`
       : `[CAUSAL] Isolated change in ${activeFile}.`;
 
-    setTerminals(prev => prev.map(t => t.id === activeTerminalId ? { ...t, history: [...t.history, `[SYSTEM] Saved ${activeFile} to VFS.`, impactMsg] } : t));
+    setTerminals(prev => prev.map(t => t.id === activeTerminalId ? { ...t, history: [...t.history, `[SYSTEM] Saved ${activeFile} to VFS (OPFS).`, impactMsg] } : t));
     hapticVibrate([20, 50, 20]);
   };
 
@@ -320,6 +345,7 @@ export default function NexusCodeApp() {
     { title: "Dev Analytics Dashboard", run: () => { setIsCommandPaletteOpen(false); setActiveTab("dashboard"); } },
     { title: "Plugin Marketplace", run: () => { setIsCommandPaletteOpen(false); setActiveTab("plugins"); } },
     { title: "Task Management", run: () => { setIsCommandPaletteOpen(false); setActiveTab("tasks"); } },
+    { title: "DevOps Dashboard", run: () => { setIsCommandPaletteOpen(false); setActiveTab("devops"); } },
   ];
   const filteredCmds = cmds.filter(c => c.title.toLowerCase().includes(cmdSearchQuery.toLowerCase()));
 
