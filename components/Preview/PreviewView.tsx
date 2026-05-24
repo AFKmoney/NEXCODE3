@@ -1,0 +1,36 @@
+"use client";
+
+import React from "react";
+import { motion } from "motion/react";
+import { Lock } from "lucide-react";
+
+type PreviewViewProps = {
+  files: Record<string, string>;
+  activeFile: string | null;
+  pageVariants: any;
+};
+
+export const PreviewView = ({
+  files,
+  activeFile,
+  pageVariants
+}: PreviewViewProps) => {
+  return (
+    <motion.div key="preview" variants={pageVariants} initial="initial" animate="animate" exit="exit" className="absolute inset-0 bg-white flex flex-col font-sans w-full h-full pb-20">
+       <div className="bg-[#f4f4f5] border-b border-gray-200 py-3 px-4 flex items-center justify-center relative shadow-sm z-10">
+         <div className="flex items-center justify-center bg-white border border-gray-200 rounded-full w-full max-w-sm py-2 gap-2 shadow-sm">
+            <Lock className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[13px] text-gray-700 font-medium tracking-wide">localhost:3000</span>
+         </div>
+       </div>
+       <div className="flex-1 w-full bg-white relative">
+         <iframe 
+           title="Localhost Preview"
+           className="w-full h-full border-none" 
+           srcDoc={files["index.html"] || (activeFile && activeFile.endsWith(".html") ? files[activeFile] : `<html><body style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:2rem;background:#fafafa;"><div style="max-w:400px;margin:2rem auto;text-align:center;background:white;padding:2rem;border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,0.05);"><h2 style="color:#111;margin-bottom:0.5rem;font-weight:700;">Local VFS Preview</h2><p style="color:#71717a;line-height:1.6;font-size:14px;margin-bottom:1.5rem;">Serving the current workspace locally. Write an index.html file to replace this view.</p><div style="display:inline-block;padding:0.5rem 1rem;background:#f4f4f5;border-radius:12px;color:#52525b;font-size:12px;font-family:monospace;font-weight:600;">Active File: ${activeFile || 'None'}</div></div></body></html>`)}
+           sandbox="allow-scripts allow-forms allow-modals"
+         />
+       </div>
+    </motion.div>
+  );
+};

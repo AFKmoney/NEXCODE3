@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:wasm": "bash tools/build-wasm.sh",
+    "build:full": "npm run build:wasm && npm run build && npx cap sync android",
     "start": "next start",
     "lint": "eslint .",
     "clean": "next clean"
