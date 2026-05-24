@@ -22,9 +22,9 @@ class NexusEngine {
       // @ts-ignore
       const [cryptoMod, diffMod] = await Promise.all([
         // @ts-ignore
-        import("../../wasm/nexus-crypto/nexus_crypto").catch(() => null),
+        import("../public/wasm/nexus-crypto/nexus_crypto").catch(() => null),
         // @ts-ignore
-        import("../../wasm/nexus-diff/nexus_diff").catch(() => null)
+        import("../public/wasm/nexus-diff/nexus_diff").catch(() => null)
       ]);
 
       if (cryptoMod) {

@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // output: 'export', // Disabled for industrial SSR support (NextAuth)
+  output: 'export',
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     config.resolve.alias['node-domexception'] = path.resolve(__dirname, 'lib/domexception.js');
