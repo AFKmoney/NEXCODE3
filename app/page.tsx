@@ -12,6 +12,7 @@ import {
   Circle, Calendar, Puzzle, DownloadCloud, Star, Upload, Heart, Info 
 } from "lucide-react";
 import * as diff from "diff";
+import { useSession, signIn, signOut } from "next-auth/react";
 
 import dynamic from "next/dynamic";
 import { nexus } from "@/lib/engine";
@@ -19,6 +20,7 @@ import { causal } from "@/lib/causal";
 import { vfs } from "@/lib/vfs";
 import { collab } from "@/lib/collab";
 import { rag } from "@/lib/rag";
+import { telemetry } from "@/lib/telemetry";
 
 // Import Refactored Components (Dynamic for client-side)
 const EditorView = dynamic(() => import("@/components/Editor/EditorView").then(mod => mod.EditorView), { ssr: false });
@@ -45,6 +47,8 @@ import type { Plugin } from "@/components/Marketplace/MarketplaceView";
 type TabType = "editor" | "files" | "terminal" | "settings" | "git" | "preview" | "graph" | "dashboard" | "plugins" | "tasks" | "devops";
 
 export default function NexusCodeApp() {
+  const { data: session } = useSession();
+
   // --- States ---
   const [activeTab, setActiveTab] = useState<TabType>("editor");
   const [activeFile, setActiveFile] = useState<string | null>(null);
@@ -116,17 +120,29 @@ export default function NexusCodeApp() {
 
   // --- Effects ---
   useEffect(() => {
+    if (session?.user) {
+      telemetry.setUser((session.user as any).id || "", session.user.email || undefined);
+    }
+  }, [session]);
+
+  useEffect(() => {
     const initEngines = async () => {
-      await nexus.init();
-      await vfs.init();
-      collab.init();
-      
-      const savedFiles = await vfs.getAllFiles();
-      if (Object.keys(savedFiles).length > 0) {
-        setFiles(savedFiles);
-        setOriginalFiles(savedFiles);
-        // Pilier 3: Index for project-wide AI awareness
-        rag.indexWorkspace(savedFiles);
+      const trace = telemetry.startTransaction("Project Load", "init");
+      try {
+        await nexus.init();
+        await vfs.init();
+        collab.init();
+        
+        const savedFiles = await vfs.getAllFiles();
+        if (Object.keys(savedFiles).length > 0) {
+          setFiles(savedFiles);
+          setOriginalFiles(savedFiles);
+          rag.indexWorkspace(savedFiles);
+        }
+      } catch (e: any) {
+        telemetry.captureException(e);
+      } finally {
+        trace.finish();
       }
     };
     initEngines();
@@ -318,6 +334,7 @@ export default function NexusCodeApp() {
     if (!overrideText) setChatInput("");
     setIsChatLoading(true);
 
+    const trace = telemetry.startTransaction("AI Chat", "gemini_call");
     try {
       if (activeProvider === 'gemini') {
         const apiKey = apiKeys.gemini;
@@ -333,8 +350,10 @@ export default function NexusCodeApp() {
         const formattedMessages = messages.map((m: any) => `${m.role === 'user' ? 'User' : 'Nexus'}: ${m.content}`).join('\n\n');
         const promptText = systemPrompt + "\n\n" + formattedMessages + "\n\nUser: " + textToSend + "\n\nNexus:";
         
+        const start = performance.now();
         const response = await (ai as any).getGenerativeModel({ model: models.gemini || 'gemini-2.5-flash' }).generateContent(promptText);
         const result = await response.response;
+        telemetry.logPerformance("ai_chat_latency", performance.now() - start, { provider: "gemini" });
         
         hapticVibrate([30, 50, 30]);
         setMessages(prev => [...prev, { role: 'ai', content: result.text() || "No response." }]);
@@ -342,9 +361,11 @@ export default function NexusCodeApp() {
         throw new Error(`Direct client-side call for ${activeProvider} is not yet implemented. Use Gemini.`);
       }
     } catch (err: any) {
+      telemetry.captureException(err, { provider: activeProvider });
       setMessages(prev => [...prev, { role: 'ai', content: `Error: ${err.message}` }]);
     } finally {
       setIsChatLoading(false);
+      trace.finish();
     }
   };
 

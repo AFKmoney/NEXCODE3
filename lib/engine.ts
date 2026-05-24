@@ -3,6 +3,8 @@
  * Orchestrates the Rust Wasm modules with fallback to JS logic.
  */
 
+import { telemetry } from "./telemetry";
+
 export type DiffOp = {
   kind: "equal" | "insert" | "delete";
   content: string;
@@ -15,6 +17,7 @@ class NexusEngine {
 
   async init() {
     if (this.isWasmLoaded) return;
+    const trace = telemetry.startTransaction("Engine Init", "wasm_load");
     try {
       // @ts-ignore
       const [cryptoMod, diffMod] = await Promise.all([
@@ -35,8 +38,11 @@ class NexusEngine {
       
       this.isWasmLoaded = !!(this.crypto || this.diff);
       console.log(`[Nexus] Wasm Engine initialized: ${this.isWasmLoaded}`);
-    } catch (e) {
+    } catch (e: any) {
+      telemetry.captureException(e, { stage: "wasm_init" });
       console.warn("[Nexus] Failed to load Wasm engine, falling back to JS.", e);
+    } finally {
+      trace.finish();
     }
   }
 
@@ -44,10 +50,14 @@ class NexusEngine {
    * High-performance textual diff using Rust (Myers + Histogram)
    */
   computeDiff(oldText: string, newText: string): DiffOp[] {
+    const start = performance.now();
     if (this.diff) {
       try {
-        return this.diff.text_diff(oldText, newText);
-      } catch (e) {
+        const result = this.diff.text_diff(oldText, newText);
+        telemetry.logPerformance("diff_wasm", performance.now() - start);
+        return result;
+      } catch (e: any) {
+        telemetry.captureException(e, { op: "diff_wasm" });
         console.error("[Nexus] Wasm diff failed:", e);
       }
     }
@@ -55,6 +65,7 @@ class NexusEngine {
     // JS Fallback using 'diff' package (simulated for type safety)
     const diff = require("diff");
     const parts = diff.diffLines(oldText, newText);
+    telemetry.logPerformance("diff_js_fallback", performance.now() - start);
     return parts.map((p: any) => ({
       kind: p.added ? "insert" : p.removed ? "delete" : "equal",
       content: p.value

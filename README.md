@@ -2,37 +2,35 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# NexusCode Mobile IDE - DevOps Edition
+# NexusCode Mobile IDE - Enterprise Edition
 
-This is a neural operating system applet built with Next.js, Rust (Wasm), and Capacitor.
+This is an industrial-grade neural operating system built with Next.js (SSR), Rust (Wasm), and Kubernetes.
+
+## Core Pillars (Industrial Level)
+1. **Infrastructure as Code (IaC):** AWS EKS, VPC, and Helm charts for distributed deployment.
+2. **Persistence & Performance:** OPFS VFS for Go-level storage and Web Workers for 60FPS background Wasm processing.
+3. **Intelligence at Scale:** RAG Engine (Semantic Indexing) and Autonomous Agents for background scans.
+4. **Security & Observability:** OAuth2 (GitHub Auth) and Sentry Telemetry for project monitoring.
 
 ## Features
-- **Rust Wasm Core Engine:** High-performance diffing, encryption, and local data logic powered by Rust.
+- **Rust Wasm Core Engine:** High-performance diffing, encryption, and local data logic.
 - **PhD Mode Causal Graph:** Dependency tracking and causality resolution.
-- **DevOps Dashboard:** Advanced orchestration controls and logs via the "Orchestration Control" UI.
-- **Fully Modular Architecture:** Split across cleanly segregated `/components/` for maintainability.
+- **DevOps Dashboard:** Advanced orchestration controls.
+- **Sentry Integration:** Real-time error and performance tracking.
+
+## Deployment
+
+### Full Suite Build
+We use a unified orchestration pipeline.
+
+1. `npm install`
+2. `make wasm`
+3. `npm run build`
+
+### Cloud Native (K8s)
+`helm upgrade --install nexus-ide ./helm/nexus-ide`
 
 ## Mobile Version (Android)
+The debug APK is in the root directory: [AI_Studio_v0.1.0_Debug.apk](./AI_Studio_v0.1.0_Debug.apk)
 
-An APK has been generated and is available in the root directory: [AI_Studio_v0.1.0_Debug.apk](./AI_Studio_v0.1.0_Debug.apk)
-
-### How to build the APK yourself:
-
-We have introduced a unified orchestration Makefile for all compilation tasks.
-
-1. Ensure dependencies are installed: `npm install`
-2. Build the Rust WebAssembly modules: `make wasm`
-3. Build the Next.js App: `make web`
-4. Build the Android APK: `make android`
-5. (Optional) Build the full suite automatically: `npm run build:full`
-
-## Run Locally (Web)
-
-**Prerequisites:** Node.js, Rust Toolchain (`cargo`), `wasm-pack`
-
-1. Install dependencies:
-   `npm install`
-2. Compile Wasm Modules:
-   `make wasm`
-3. Run the app:
-   `npm run dev`
+*Note: The mobile version uses a mocked auth layer to support offline-first static environments.*

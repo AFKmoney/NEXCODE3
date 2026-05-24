@@ -3,22 +3,10 @@
 import React from "react";
 import { Menu, ChevronRight, Database, Play, Loader2, MousePointer2, BrainCircuit, Edit3, Settings, Command } from "lucide-react";
 
+import { useSession, signIn, signOut } from "next-auth/react";
+
 type MainHeaderProps = {
-  activeTab: string;
-  activeFile: string | null;
-  currentRepo: string | null;
-  setActiveTab: (tab: string) => void;
-  setIsCommandPaletteOpen: (val: boolean) => void;
-  handleSaveVFS: () => void;
-  handleRunCode: () => void;
-  isRunning: boolean;
-  isEditMode: boolean;
-  setIsEditMode: (val: boolean) => void;
-  handleRefactorAnalysis: () => void;
-  isAnalyzing: boolean;
-  refactorPreview: any;
-  setSelectedLines: (val: number[]) => void;
-  setRefactorPreview: (val: any) => void;
+  // ... rest of props ...
 };
 
 export const MainHeader = ({
@@ -38,6 +26,8 @@ export const MainHeader = ({
   setSelectedLines,
   setRefactorPreview
 }: MainHeaderProps) => {
+  const { data: session } = useSession();
+
   return (
     <header className="h-14 border-b border-white/5 flex items-center justify-between px-4 z-40 bg-transparent backdrop-blur-md">
       {activeTab === "editor" && activeFile ? (
@@ -58,6 +48,12 @@ export const MainHeader = ({
             </div>
           </div>
           <div className="flex gap-2 bg-white/5 rounded-full p-1 border border-white/5 shadow-sm absolute right-4">
+            {session?.user && (
+              <div className="flex items-center gap-2 mr-2 pr-2 border-r border-white/10">
+                <img src={session.user.image || ""} className="w-5 h-5 rounded-full border border-white/10" alt="Avatar" />
+                <span className="text-[10px] font-bold text-gray-400 hidden sm:block">{session.user.name}</span>
+              </div>
+            )}
             <button onClick={handleSaveVFS} className="p-1.5 justify-center items-center rounded-full transition-all text-gray-400 hover:bg-emerald-500/20 hover:text-emerald-400 group relative">
               <Database className="w-4 h-4" />
             </button>
@@ -82,11 +78,21 @@ export const MainHeader = ({
               <Settings className="w-4 h-4" />
            </button>
            <span className="text-[14px] font-display font-medium tracking-widest text-white uppercase">
-             {activeTab === "files" ? "Explorer" : activeTab === "settings" ? "Settings" : activeTab === "git" ? "VCS / Git" : activeTab === "preview" ? "Live Preview" : activeTab === "graph" ? "Dep Graph" : activeTab === "plugins" ? "Marketplace" : activeTab === "tasks" ? "Task Board" : "Terminal"}
+             {activeTab === "files" ? "Explorer" : activeTab === "settings" ? "Settings" : activeTab === "git" ? "VCS / Git" : activeTab === "preview" ? "Live Preview" : activeTab === "graph" ? "Dep Graph" : activeTab === "plugins" ? "Marketplace" : activeTab === "tasks" ? "Task Board" : activeTab === "devops" ? "Orchestration" : "Terminal"}
            </span>
-           <button onClick={() => setIsCommandPaletteOpen(true)} className="absolute right-0 p-1.5 bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
-              <Command className="w-4 h-4" />
-           </button>
+           <div className="absolute right-0 flex items-center gap-2">
+             {session?.user ? (
+               <button onClick={() => signOut()} className="flex items-center gap-2 p-1.5 bg-white/5 rounded-full border border-white/5 hover:bg-red-500/10 transition-colors group">
+                 <img src={session.user.image || ""} className="w-5 h-5 rounded-full" alt="User" />
+                 <X className="w-3 h-3 text-transparent group-hover:text-red-400 absolute right-1 top-1" />
+               </button>
+             ) : (
+               <button onClick={() => signIn('github')} className="p-1.5 bg-white/10 rounded-full text-white text-[10px] font-bold uppercase tracking-widest px-4 hover:bg-white/20 transition-all">Sign In</button>
+             )}
+             <button onClick={() => setIsCommandPaletteOpen(true)} className="p-1.5 bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+                <Command className="w-4 h-4" />
+             </button>
+           </div>
         </div>
       )}
     </header>
