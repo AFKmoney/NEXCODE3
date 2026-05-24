@@ -1,12 +1,26 @@
 "use client";
 
 import React from "react";
-import { Menu, ChevronRight, Database, Play, Loader2, MousePointer2, BrainCircuit, Edit3, Settings, Command } from "lucide-react";
+import { Menu, ChevronRight, Database, Play, Loader2, MousePointer2, BrainCircuit, Edit3, Settings, Command, X } from "lucide-react";
 
 import { useSession, signIn, signOut } from "next-auth/react";
 
 type MainHeaderProps = {
-  // ... rest of props ...
+  activeTab: string;
+  activeFile: string | null;
+  currentRepo: string | null;
+  setActiveTab: (tab: any) => void;
+  setIsCommandPaletteOpen: (val: boolean) => void;
+  handleSaveVFS: () => void;
+  handleRunCode: () => void;
+  isRunning: boolean;
+  isEditMode: boolean;
+  setIsEditMode: (val: boolean) => void;
+  handleRefactorAnalysis: () => void;
+  isAnalyzing: boolean;
+  refactorPreview: any;
+  setSelectedLines: (val: number[]) => void;
+  setRefactorPreview: (val: any) => void;
 };
 
 export const MainHeader = ({
